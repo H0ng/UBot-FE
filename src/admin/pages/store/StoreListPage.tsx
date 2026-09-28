@@ -20,6 +20,10 @@ export function StoreListPage() {
   const [phoneNumberInput, setPhoneNumberInput] = useState('')
   const [storeName, setStoreName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
+  const [sidos, setSidos] = useState<string[]>([])
+  const [sigungus, setSigungus] = useState<string[]>([])
+  const [sido, setSido] = useState('')
+  const [sigungu, setSigungu] = useState('')
   const [serviceCodes, setServiceCodes] = useState<string[]>([])
   const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -28,6 +32,25 @@ export function StoreListPage() {
   const [formStore, setFormStore] = useState<StoreDetail | null | undefined>(undefined)
   const [detailStoreId, setDetailStoreId] = useState<number | null>(null)
   const [deleteStore, setDeleteStore] = useState<AdminStore | null>(null)
+
+  useEffect(() => {
+    void adminStoreApi
+      .getSidos()
+      .then(setSidos)
+      .catch(() => setSidos([]))
+  }, [])
+
+  useEffect(() => {
+    if (!sido) {
+      setSigungus([])
+      return
+    }
+
+    void adminStoreApi
+      .getSigungus(sido)
+      .then(setSigungus)
+      .catch(() => setSigungus([]))
+  }, [sido])
 
   useEffect(() => {
     let cancelled = false
@@ -39,6 +62,8 @@ export function StoreListPage() {
         const next = await adminStoreApi.getStores({
           storeName: storeName || undefined,
           phoneNumber: phoneNumber || undefined,
+          sido: sido || undefined,
+          sigungu: sigungu || undefined,
           serviceCodes,
           page,
           size: 20,
@@ -62,7 +87,7 @@ export function StoreListPage() {
     return () => {
       cancelled = true
     }
-  }, [page, phoneNumber, revision, serviceCodes, storeName])
+  }, [page, phoneNumber, revision, serviceCodes, sido, sigungu, storeName])
 
   async function openEdit(storeId: number) {
     setError(null)
@@ -90,11 +115,20 @@ export function StoreListPage() {
     setPage(0)
   }
 
+  function changeSido(nextSido: string) {
+    setSido(nextSido)
+    setSigungu('')
+    setPage(0)
+  }
+
   function resetFilters() {
     setStoreNameInput('')
     setPhoneNumberInput('')
     setStoreName('')
     setPhoneNumber('')
+    setSido('')
+    setSigungu('')
+    setSigungus([])
     setServiceCodes([])
     setPage(0)
   }
@@ -126,6 +160,36 @@ export function StoreListPage() {
           placeholder="연락처"
           value={phoneNumberInput}
         />
+
+        <select
+          aria-label="시도 선택"
+          onChange={(event) => changeSido(event.target.value)}
+          value={sido}
+        >
+          <option value="">전체 시/도</option>
+          {sidos.map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
+
+        <select
+          aria-label="시군구 선택"
+          disabled={!sido}
+          onChange={(event) => {
+            setSigungu(event.target.value)
+            setPage(0)
+          }}
+          value={sigungu}
+        >
+          <option value="">전체 시/군/구</option>
+          {sigungus.map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
 
         <div className="admin-store-filter-services">
           {serviceFilters.map(([code, name]) => (

@@ -5,6 +5,8 @@ import type { AdminStore, StoreDetail, StoreFormValues, StoreListParams } from '
 function listQuery({
   storeName,
   phoneNumber,
+  sido,
+  sigungu,
   serviceCodes = [],
   page = 0,
   size = 20,
@@ -16,6 +18,8 @@ function listQuery({
 
   if (storeName?.trim()) query.set('storeName', storeName.trim())
   if (phoneNumber?.trim()) query.set('phoneNumber', phoneNumber.trim())
+  if (sido?.trim()) query.set('sido', sido.trim())
+  if (sigungu?.trim()) query.set('sigungu', sigungu.trim())
   serviceCodes.forEach((code) => query.append('type', code))
 
   return query.toString()

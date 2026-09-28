@@ -40,6 +40,8 @@ export interface StoreFormValues {
 export interface StoreListParams {
   storeName?: string
   phoneNumber?: string
+  sido?: string
+  sigungu?: string
   serviceCodes?: string[]
   page?: number
   size?: number
