@@ -146,21 +146,6 @@ export function StoreListPage() {
       </div>
 
       <form className="faq-search admin-store-search" onSubmit={submitSearch}>
-        <input
-          aria-label="매장명 검색"
-          maxLength={150}
-          onChange={(event) => setStoreNameInput(event.target.value)}
-          placeholder="매장명"
-          value={storeNameInput}
-        />
-        <input
-          aria-label="연락처 검색"
-          maxLength={30}
-          onChange={(event) => setPhoneNumberInput(event.target.value)}
-          placeholder="연락처"
-          value={phoneNumberInput}
-        />
-
         <select
           aria-label="시도 선택"
           onChange={(event) => changeSido(event.target.value)}
@@ -190,6 +175,21 @@ export function StoreListPage() {
             </option>
           ))}
         </select>
+
+        <input
+          aria-label="매장명 검색"
+          maxLength={150}
+          onChange={(event) => setStoreNameInput(event.target.value)}
+          placeholder="매장명"
+          value={storeNameInput}
+        />
+        <input
+          aria-label="연락처 검색"
+          maxLength={30}
+          onChange={(event) => setPhoneNumberInput(event.target.value)}
+          placeholder="연락처"
+          value={phoneNumberInput}
+        />
 
         <div className="admin-store-filter-services">
           {serviceFilters.map(([code, name]) => (

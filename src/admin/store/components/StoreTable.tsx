@@ -12,7 +12,7 @@ export function StoreTable({
   onDelete: (store: AdminStore) => void
 }) {
   return (
-    <div className="faq-table-wrapper">
+    <div className="faq-table-wrapper admin-store-table-wrapper">
       <table className="faq-table admin-store-table">
         <thead>
           <tr>
@@ -35,12 +35,18 @@ export function StoreTable({
           ) : (
             stores.map((store) => (
               <tr key={store.storeId}>
-                <td>{store.storeId}</td>
-                <td className="faq-table__question">{store.storeName}</td>
-                <td>{[store.sido, store.sigungu].filter(Boolean).join(' ') || '-'}</td>
-                <td className="admin-store-table__address">{store.address}</td>
-                <td>{store.phoneNumber ?? '-'}</td>
-                <td>
+                <td data-label="ID">{store.storeId}</td>
+                <td className="faq-table__question" data-label="매장명">
+                  {store.storeName}
+                </td>
+                <td data-label="지역">
+                  {[store.sido, store.sigungu].filter(Boolean).join(' ') || '-'}
+                </td>
+                <td className="admin-store-table__address" data-label="주소">
+                  {store.address}
+                </td>
+                <td data-label="연락처">{store.phoneNumber ?? '-'}</td>
+                <td data-label="제공 서비스">
                   {store.services.length > 0 ? (
                     <div className="admin-store-table__services">
                       {store.services.map((service) => (
@@ -53,7 +59,7 @@ export function StoreTable({
                     '-'
                   )}
                 </td>
-                <td>
+                <td data-label="관리">
                   <div className="faq-row-actions">
                     <button
                       className="table-action-button"
