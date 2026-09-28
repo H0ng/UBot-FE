@@ -9,6 +9,34 @@ const serviceOptions = [
   ['FOREIGN_LANGUAGE_SUPPORT', '외국어 지원'],
 ] as const
 
+function formatPhoneNumber(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 11)
+
+  if (!digits) return ''
+
+  if (/^(15|16|18)\d{6}$/.test(digits)) {
+    return `${digits.slice(0, 4)}-${digits.slice(4)}`
+  }
+
+  if (digits.startsWith('02')) {
+    if (digits.length <= 2) return digits
+    if (digits.length <= 5) return `${digits.slice(0, 2)}-${digits.slice(2)}`
+    if (digits.length <= 9) return `${digits.slice(0, 2)}-${digits.slice(2, 5)}-${digits.slice(5)}`
+    return `${digits.slice(0, 2)}-${digits.slice(2, 6)}-${digits.slice(6)}`
+  }
+
+  if (digits.length <= 3) return digits
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`
+  if (digits.length <= 10) return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`
+
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`
+}
+
+function businessTimesFrom(value: string | null | undefined) {
+  const times = value?.match(/(?:[01]\d|2[0-3]):[0-5]\d/g) ?? []
+  return { openTime: times[0] ?? '', closeTime: times[1] ?? '' }
+}
+
 const blankValues: StoreFormValues = {
   storeName: '',
   sido: '',
@@ -28,7 +56,7 @@ const valuesFrom = (store: StoreDetail): StoreFormValues => ({
   address: store.address,
   latitude: store.latitude,
   longitude: store.longitude,
-  phoneNumber: store.phoneNumber ?? '',
+  phoneNumber: formatPhoneNumber(store.phoneNumber ?? ''),
   businessHours: store.businessHours ?? '',
   serviceCodes: store.services.map((service) => service.code),
 })
@@ -42,7 +70,10 @@ export function StoreFormModal({
   onClose: () => void
   onSaved: () => void
 }) {
+  const initialBusinessTimes = businessTimesFrom(store?.businessHours)
   const [values, setValues] = useState<StoreFormValues>(() => store ? valuesFrom(store) : blankValues)
+  const [openTime, setOpenTime] = useState(initialBusinessTimes.openTime)
+  const [closeTime, setCloseTime] = useState(initialBusinessTimes.closeTime)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [addressSearching, setAddressSearching] = useState(false)
@@ -53,12 +84,24 @@ export function StoreFormModal({
 
   async function submit(event: FormEvent) {
     event.preventDefault()
-    setSubmitting(true)
     setError(null)
 
+    if (Boolean(openTime) !== Boolean(closeTime)) {
+      setError('영업 시작 시간과 종료 시간을 모두 선택해 주세요.')
+      return
+    }
+
+    const submitValues: StoreFormValues = {
+      ...values,
+      phoneNumber: formatPhoneNumber(values.phoneNumber),
+      businessHours: openTime && closeTime ? `${openTime} - ${closeTime}` : '',
+    }
+
+    setSubmitting(true)
+
     try {
-      if (store) await adminStoreApi.updateStore(store.storeId, values)
-      else await adminStoreApi.createStore(values)
+      if (store) await adminStoreApi.updateStore(store.storeId, submitValues)
+      else await adminStoreApi.createStore(submitValues)
 
       onSaved()
       onClose()
@@ -129,6 +172,7 @@ export function StoreFormModal({
             <input
               maxLength={150}
               onChange={(event) => set('storeName', event.target.value)}
+              placeholder="예) U+ 강남역점"
               required
               value={values.storeName}
             />
@@ -137,10 +181,13 @@ export function StoreFormModal({
           <label>
             연락처
             <input
-              maxLength={30}
-              onChange={(event) => set('phoneNumber', event.target.value)}
+              inputMode="numeric"
+              maxLength={13}
+              onChange={(event) => set('phoneNumber', formatPhoneNumber(event.target.value))}
+              placeholder="예) 01012341234"
               value={values.phoneNumber}
             />
+            <small className="admin-store-form__hint">숫자만 입력해도 하이픈이 자동으로 붙습니다.</small>
           </label>
 
           <label>
@@ -148,6 +195,7 @@ export function StoreFormModal({
             <input
               maxLength={50}
               onChange={(event) => set('sido', event.target.value)}
+              placeholder="주소 검색 시 자동 입력"
               value={values.sido}
             />
           </label>
@@ -157,6 +205,7 @@ export function StoreFormModal({
             <input
               maxLength={50}
               onChange={(event) => set('sigungu', event.target.value)}
+              placeholder="주소 검색 시 자동 입력"
               value={values.sigungu}
             />
           </label>
@@ -167,6 +216,7 @@ export function StoreFormModal({
               <input
                 maxLength={500}
                 onChange={(event) => set('address', event.target.value)}
+                placeholder="주소 검색을 이용해 주세요"
                 required
                 value={values.address}
               />
@@ -209,10 +259,21 @@ export function StoreFormModal({
 
           <label className="admin-store-form__full">
             영업시간
-            <input
-              onChange={(event) => set('businessHours', event.target.value)}
-              value={values.businessHours}
-            />
+            <span className="admin-store-business-hours">
+              <input
+                aria-label="영업 시작 시간"
+                onChange={(event) => setOpenTime(event.target.value)}
+                type="time"
+                value={openTime}
+              />
+              <span className="admin-store-business-hours__separator">~</span>
+              <input
+                aria-label="영업 종료 시간"
+                onChange={(event) => setCloseTime(event.target.value)}
+                type="time"
+                value={closeTime}
+              />
+            </span>
           </label>
         </div>
 
