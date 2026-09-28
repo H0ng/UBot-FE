@@ -176,6 +176,10 @@
 .admin-store-address-field { display: flex; gap: 8px; }
 .admin-store-address-field input { flex: 1; min-width: 0; }
 .admin-store-address-field .secondary-button { flex: 0 0 auto; white-space: nowrap; }
+.admin-store-form__hint { margin-top: -3px; color: #9ca3af; font-size: 11px; font-weight: 500; }
+.admin-store-business-hours { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px; }
+.admin-store-business-hours input { width: 100%; min-width: 0; }
+.admin-store-business-hours__separator { color: #6b7280; font-weight: 700; }
 .admin-store-services { display: flex; flex-wrap: wrap; gap: 12px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; }
 .admin-store-services legend { padding: 0 4px; color: #374151; font-size: 14px; font-weight: 700; }
 
@@ -229,6 +233,8 @@
   .admin-store-form__grid { grid-template-columns: 1fr; }
   .admin-store-form__full { grid-column: auto; }
   .admin-store-address-field { align-items: stretch; flex-direction: column; }
+  .admin-store-business-hours { grid-template-columns: 1fr; }
+  .admin-store-business-hours__separator { text-align: center; }
   .admin-store-search { grid-template-columns: 1fr; }
   .admin-store-service-filter { grid-column: auto; }
 }
